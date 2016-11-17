@@ -1,4 +1,62 @@
-function [Faktoren,Splinegrad,Knopt,Knots] = BSplineEst(z1,z2,AnzManVar,DimUnVar,AnzahlMessungenX)
+function [Factores,splinedeg,Knopt,Knots,z1] = BSplineEst(z1_inp,z2,DimUnVar)
+ 
+%{
+Input
+Z1: Is a vector containing the estimated factor scores of the 
+independent latent variable.
+Z2: Is a vector containing the estimated factor scores of the dependent
+variable
+DimUnVar: This is a vector giving the number of observable variables for
+every latent variable in the order they are given in the dataset. For
+example [3,4,3] if there are 2 independent latent variables with 3 and 4
+observable variables respectively and if the dependent latent variable has 
+3 observable variables.
+
+Output
+FACTORES: Are the factores of the B-Splines
+SPLINEDEG: Is the degree of the B-Splines
+KNOTS: Are the used knots of the B-Splines
+KNOPT: Is the optimal Number of Knots
+
+With the results you can still use the PLOTS of the function ModelEst
+
+%}
+
+NumbObs = length(z2);
+
+if iscell(z1_inp) == 0
+   if size(z1_inp,2) == DimUnVar
+       z1 = cell(1,DimUnVar);
+       for it3 = 1:DimUnVar
+           z1{it3} = z1_inp(:,it3);
+       end
+   elseif size(z1_inp,1) == DimUnVar
+       z1 = cell(1,DimUnVar);
+       for it3 = 1:DimUnVar
+           z1{it3} = z1_inp(it3,:)';
+       end
+   elseif size(z1_inp,1) == length(z2)*DimUnVar
+       z1 = cell(1,DimUnVar);
+       for it3 = 1:DimUnVar
+           z1{it3} = z1_inp((NumbObs*(it3-1)+1):(NumbObs*it3),1);
+       end
+   elseif size(z1_inp,2) == length(z2)*DimUnVar
+       z1 = cell(1,DimUnVar);
+       for it3 = 1:DimUnVar
+           z1{it3} = z1_inp(1,(NumbObs*(it3-1)+1):(NumbObs*it3))';
+       end
+   end
+else
+    z1 = z1_inp;
+end
+
+% z1 = cell(1,DimUnVar);
+% for it3 = 1:DimUnVar
+%     z1{it3} = z_all((NumbObs*(it3-1)+1):(NumbObs*it3),min_Ind);
+% end
+% z2 = z_all((end-NumbObs+1):end,min_Ind);
+
+
 
 if DimUnVar == 1
     z1 = z1{1};
@@ -23,7 +81,7 @@ if DimUnVar == 1
             C = B'*B;
             d = B'*Trainingz2;
             C = sparse(C);
-            [a,Test] = lsqr(C,d,[],20);
+            [a,~] = lsqr(C,d,[],20);
 
             clear B b
         
@@ -36,17 +94,17 @@ if DimUnVar == 1
     
             if n == 1
                 kleinsterFehler = Fehler; 
-                Faktoren = a;
+                Factores = a;
                 Knots = t;
-                Splinegrad = Grad-1;
+                splinedeg = Grad-1;
                 Knopt = Kn(n+1);
             end
     
             if Fehler < kleinsterFehler
                 kleinsterFehler = Fehler;
-                Faktoren = a;
+                Factores = a;
                 Knots = t;
-                Splinegrad = Grad-1;
+                splinedeg = Grad-1;
                 Knopt = Kn(n+1);
             end
     
@@ -99,7 +157,7 @@ elseif DimUnVar >= 2
         C = B'*B;
         d = B'*Trainingz2;
         C = sparse(C);
-        [a,Test] = lsqr(C,d,[],20);
+        [a,~] = lsqr(C,d,[],20);
 
         clear B b
 
@@ -125,17 +183,17 @@ elseif DimUnVar >= 2
 
         if n == 1
            kleinsterFehler = Fehler; 
-           Faktoren = a;
+           Factores = a;
            Knots = t;
-           Splinegrad = Grad-1;
+           splinedeg = Grad-1;
            Knopt = Kn(n);
         end
 
         if Fehler < kleinsterFehler
            kleinsterFehler = Fehler;
-           Faktoren = a;
+           Factores = a;
            Knots = t;
-           Splinegrad = Grad-1;
+           splinedeg = Grad-1;
            Knopt = Kn(n);
         end
 

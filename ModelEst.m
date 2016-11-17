@@ -1,5 +1,5 @@
-function [z1,z2,factores,splinedeg,Knots] = ModelEst(Data,NumbObsVar,Plot)
-
+function [z1,z2,epsilon,delta,factores,splinedeg,Knots] = ModelEst(Data,NumbObsVar,Plot)
+ 
 %{
 This is the main file you can use to estimate the factor scores and the
 regression function of your given data. It uses the functions 
@@ -32,39 +32,24 @@ variable
 FACTORES: Are the factores of the B-Splines
 SPLINEDEG: Is the degree of the B-Splines
 KNOTS: Are the used knots of the B-Splines
+EPSILON: Is the estimation of the errors in the measurement model for the
+independent variables.
+DELTA: Is the estimation of the errors in the measurement model for the
+dependent variable.
 %}
 
-
-fid=(Data);
-Daten=load(fid);
-format long
 %%
+
+% Estimation of the Factor Scores
+[z1,z2,epsilon,delta] = FactorScoresEst(Data,NumbObsVar);
+
+% Estimation of the Regression between the Factor Scores
 DimUnVar = length(NumbObsVar)-1;
-X = cell(1,DimUnVar);
-AnzManVar_1 = [0,NumbObsVar];
-if size(Daten,2) < size(Daten,1)
-    for i=1:DimUnVar
-        X(i) = {Daten(:,((i-1)*sum(AnzManVar_1(1:i))+1):(sum(AnzManVar_1(1:(i+1)))))};
-    end
-    Y = Daten(:,((end-NumbObsVar(end)+1):end));
-    X = cellfun(@transpose,X,'UniformOutput',false);
-    Y = Y';
-else
-    for i=1:DimUnVar
-        X(i) = {Daten((sum(AnzManVar_1(1:i))+1):(sum(AnzManVar_1(1:(i+1)))),:)};
-    end
-    Y = Daten(((end-NumbObsVar(end)+1):end),:);
-end
-%%
+[factores,splinedeg,Knopt,Knots,z1] = BSplineEst(z1_inp,z2,DimUnVar);
 
-NumbObs = size(Y,2);
-
-[z1,z2,factores,splinedeg,Knopt,Knots] = FactorScoresEst(X,Y,NumbObsVar,DimUnVar,NumbObs);
- 
-% TODO: Hier berechne ich dann die Schätzung für die geschätzten z-Werte.
-% Die muss ich mir dafür übergeben und gebe dann, falls gewünscht eine
-% Zeichnung aus, wenn es eindimensional oder zweidimensional ist
-
+%% % Possible Plots
+% If you estimated only the regression with given Factor Scores you can
+% execute just the lines of every case to get the plots
 if nargin == 3
     switch Plot
         case 1  %Factor scores against each other
