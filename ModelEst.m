@@ -45,7 +45,7 @@ dependent variable.
 
 % Estimation of the Regression between the Factor Scores
 DimUnVar = length(NumbObsVar)-1;
-[factores,splinedeg,Knopt,Knots,z1] = BSplineEst(z1_inp,z2,DimUnVar);
+[factores,splinedeg,Knopt,Knots,z1] = BSplineEst(z1,z2,DimUnVar);
 
 %% % Possible Plots
 % If you estimated only the regression with given Factor Scores you can
