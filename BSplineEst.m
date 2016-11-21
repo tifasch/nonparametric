@@ -112,6 +112,11 @@ if DimUnVar == 1
         end
     end
 
+    z1_t = cell(1,1);
+    z1_t{1} = z1;
+    clear z1
+    z1 = z1_t;
+
 elseif DimUnVar >= 2
     zmin = zeros(DimUnVar,1);
     zmax = zeros(DimUnVar,1);
